@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head :: head ('Accesia - Establecimiento')"></head>
+
+<body class="d-flex flex-column h-100">
+
+<!-- Insertar el fragmento del header -->
+<header th:replace="fragments/header :: header"></header>
+<!-- Contenido dinámico -->
+<main class="form-page">
+    <div class="form-card">
+
+        <!-- Título dinámico (alta / edición) -->
+        <h1 th:text="${establecimiento.id} == null ? #{msg.establecimiento-form.add} : #{msg.establecimiento-form.edit}"></h1>
+
+        <!-- Mensaje de error global -->
+        <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+
+        <!-- Paso 1: imagen actual del establecimiento (si no tiene, imagen por defecto) -->
+        <div class="text-center mb-3">
+            <img th:src="${establecimiento.imagen != null and !#strings.isEmpty(establecimiento.imagen)}
+                         ? @{${establecimiento.imagen}} : @{/images/logo.svg}"
+                 alt="Imagen" class="img-thumbnail rounded" style="max-width: 150px;">
+        </div>
+
+        <!-- Formulario: si no hay id es un alta, si hay id es una edición -->
+        <!-- Paso 2: cualquier formulario con subida de ficheros necesita enctype="multipart/form-data" -->
+        <form th:action="${establecimiento.id} == null ? @{/establecimientos/insert} : @{/establecimientos/update}"
+              th:object="${establecimiento}" method="post" enctype="multipart/form-data" class="mt-3">
+
+            <input type="hidden" th:field="*{id}"/>
+            <input type="hidden" th:field="*{imagen}"/>
+
+            <!-- Nombre -->
+            <div class="mb-3">
+                <label for="nombre" class="form-label" th:text="#{msg.establecimiento-form.nombre}"></label>
+                <input type="text" id="nombre" th:field="*{nombre}" class="form-control" maxlength="150" />
+                <div th:if="${#fields.hasErrors('nombre')}" class="text-danger" th:errors="*{nombre}"></div>
+            </div>
+
+            <!-- Tipo (select con los valores del enum TipoEstablecimiento) -->
+            <div class="mb-3">
+                <label for="tipo" class="form-label" th:text="#{msg.establecimiento-form.tipo}"></label>
+                <select id="tipo" class="form-select" th:field="*{tipo}">
+                    <option value="" th:text="#{msg.establecimiento-form.tipo.select}"></option>
+                    <option th:each="t : ${tiposEstablecimiento}" th:value="${t}"
+                            th:text="#{${'msg.tipoEstablecimiento.' + t}}"></option>
+                </select>
+                <div th:if="${#fields.hasErrors('tipo')}" class="text-danger" th:errors="*{tipo}"></div>
+            </div>
+
+            <!-- Dirección -->
+            <div class="mb-3">
+                <label for="direccion" class="form-label" th:text="#{msg.establecimiento-form.direccion}"></label>
+                <input type="text" id="direccion" th:field="*{direccion}" class="form-control" maxlength="255" />
+                <div th:if="${#fields.hasErrors('direccion')}" class="text-danger" th:errors="*{direccion}"></div>
+            </div>
+
+            <!-- Descripción (opcional) -->
+            <div class="mb-3">
+                <label for="descripcion" class="form-label" th:text="#{msg.establecimiento-form.descripcion}"></label>
+                <textarea id="descripcion" th:field="*{descripcion}" class="form-control" rows="3" maxlength="1000"></textarea>
+                <div th:if="${#fields.hasErrors('descripcion')}" class="text-danger" th:errors="*{descripcion}"></div>
+            </div>
+
+            <!-- Aforo máximo -->
+            <div class="mb-3">
+                <label for="aforoMaximo" class="form-label" th:text="#{msg.establecimiento-form.aforoMaximo}"></label>
+                <input type="number" id="aforoMaximo" th:field="*{aforoMaximo}" class="form-control" min="1" />
+                <div th:if="${#fields.hasErrors('aforoMaximo')}" class="text-danger" th:errors="*{aforoMaximo}"></div>
+            </div>
+
+            <!-- Precio de referencia (con 2 decimales) -->
+            <div class="mb-3">
+                <label for="precioReferencia" class="form-label" th:text="#{msg.establecimiento-form.precioReferencia}"></label>
+                <input type="number" id="precioReferencia" th:field="*{precioReferencia}" class="form-control" min="0" step="0.01" />
+                <div th:if="${#fields.hasErrors('precioReferencia')}" class="text-danger" th:errors="*{precioReferencia}"></div>
+            </div>
+
+            <!-- Edad mínima (opcional) -->
+            <div class="mb-3">
+                <label for="edadMinima" class="form-label" th:text="#{msg.establecimiento-form.edadMinima}"></label>
+                <input type="number" id="edadMinima" th:field="*{edadMinima}" class="form-control" min="0" max="99" />
+                <div th:if="${#fields.hasErrors('edadMinima')}" class="text-danger" th:errors="*{edadMinima}"></div>
+            </div>
+
+            <!-- Casillas (booleanos) -->
+            <div class="form-check mb-2">
+                <input type="checkbox" id="exigeCuentaConfirmada" th:field="*{exigeCuentaConfirmada}" class="form-check-input"/>
+                <label for="exigeCuentaConfirmada" class="form-check-label" th:text="#{msg.establecimiento-form.exigeCuentaConfirmada}"></label>
+            </div>
+            <div class="form-check mb-2">
+                <input type="checkbox" id="aforoPublico" th:field="*{aforoPublico}" class="form-check-input"/>
+                <label for="aforoPublico" class="form-check-label" th:text="#{msg.establecimiento-form.aforoPublico}"></label>
+            </div>
+            <div class="form-check mb-2">
+                <input type="checkbox" id="activo" th:field="*{activo}" class="form-check-input"/>
+                <label for="activo" class="form-check-label" th:text="#{msg.establecimiento-form.activo}"></label>
+            </div>
+
+            <!-- Imagen actual (ruta guardada) -->
+            <div class="mb-3 mt-3">
+                <label for="imagenRO" class="form-label" th:text="#{msg.establecimiento-form.imagen}"></label>
+                <input type="text" id="imagenRO" class="form-control" th:value="*{imagen}"
+                       th:placeholder="#{msg.establecimiento-form.imagen.placeholder}" disabled>
+            </div>
+
+            <!-- Paso 3: subida de una nueva imagen (campo independiente imagenFile) -->
+            <div class="mb-3">
+                <label for="imagenFile" class="form-label" th:text="#{msg.establecimiento-form.imagenUpload}"></label>
+                <input type="file" id="imagenFile" name="imagenFile" class="form-control" accept="image/*">
+                <div class="form-text" th:text="#{msg.establecimiento-form.imagenUpload.help}"></div>
+            </div>
+
+            <!-- Botón submit dinámico -->
+            <button type="submit" class="btn btn-primary"
+                    th:text="${establecimiento.id} == null ? #{msg.establecimiento-form.create} : #{msg.establecimiento-form.update}"></button>
+
+            <!-- Volver al listado -->
+            <a th:href="@{/establecimientos}" class="btn btn-secondary" th:text="#{msg.establecimiento-form.returnback}"></a>
+        </form>
+
+    </div>
+</main>
+
+<!-- Insertar el fragmento del footer -->
+<footer th:replace="fragments/footer :: footer"></footer>
+
+<div th:replace="fragments/scripts :: scripts"></div>
+
+</body>
+</html>

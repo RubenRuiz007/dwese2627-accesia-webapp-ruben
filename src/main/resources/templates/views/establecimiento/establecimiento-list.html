@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head :: head ('Accesia - Establecimientos')"></head>
+
+<body class="d-flex flex-column h-100">
+
+<!-- Insertar el fragmento del header -->
+<header th:replace="fragments/header :: header"></header>
+<!-- Contenido dinámico -->
+<main class="list-page">
+    <!-- sortField y sortDir se sacan de sortParam ("campo,asc|desc") que envía el controller -->
+    <div class="list-card"
+         th:with="sortField=${sortParam != null ? #strings.substringBefore(sortParam, ',') : 'nombre'},
+                  sortDir=${sortParam != null ? #strings.substringAfter(sortParam, ',') : 'asc'}">
+
+        <!-- Título listado -->
+        <h1 th:text="#{msg.establecimiento-list.title}"></h1>
+
+        <!-- Botón para añadir nuevo establecimiento -->
+        <a th:href="@{/establecimientos/new}" class="btn btn-success" th:text="#{msg.establecimiento-list.add}"></a>
+
+        <!-- Mensaje de error -->
+        <div th:if="${errorMessage}" class="alert alert-danger mt-3" th:text="${errorMessage}"></div>
+
+        <table class="table table-bordered table-striped mt-3" th:if="${page != null}">
+            <thead>
+            <tr>
+                <th>
+                    <a class="text-decoration-none"
+                       th:href="@{/establecimientos(page=${page.number}, size=${page.size},
+                                     sort=${(sortField == 'id' and sortDir == 'asc') ? 'id,desc' : 'id,asc'})}">
+                        <span th:text="#{msg.establecimiento-list.id}"></span>
+                        <span class="ms-1" th:if="${sortField == 'id'}"
+                              th:text="${sortDir == 'asc'} ? '▲' : '▼'"></span>
+                    </a>
+                </th>
+                <th>
+                    <a class="text-decoration-none"
+                       th:href="@{/establecimientos(page=${page.number}, size=${page.size},
+                                     sort=${(sortField == 'nombre' and sortDir == 'asc') ? 'nombre,desc' : 'nombre,asc'})}">
+                        <span th:text="#{msg.establecimiento-list.nombre}"></span>
+                        <span class="ms-1" th:if="${sortField == 'nombre'}"
+                              th:text="${sortDir == 'asc'} ? '▲' : '▼'"></span>
+                    </a>
+                </th>
+                <th>
+                    <a class="text-decoration-none"
+                       th:href="@{/establecimientos(page=${page.number}, size=${page.size},
+                                     sort=${(sortField == 'tipo' and sortDir == 'asc') ? 'tipo,desc' : 'tipo,asc'})}">
+                        <span th:text="#{msg.establecimiento-list.tipo}"></span>
+                        <span class="ms-1" th:if="${sortField == 'tipo'}"
+                              th:text="${sortDir == 'asc'} ? '▲' : '▼'"></span>
+                    </a>
+                </th>
+                <th>
+                    <a class="text-decoration-none"
+                       th:href="@{/establecimientos(page=${page.number}, size=${page.size},
+                                     sort=${(sortField == 'aforoMaximo' and sortDir == 'asc') ? 'aforoMaximo,desc' : 'aforoMaximo,asc'})}">
+                        <span th:text="#{msg.establecimiento-list.aforoMaximo}"></span>
+                        <span class="ms-1" th:if="${sortField == 'aforoMaximo'}"
+                              th:text="${sortDir == 'asc'} ? '▲' : '▼'"></span>
+                    </a>
+                </th>
+                <th>
+                    <a class="text-decoration-none"
+                       th:href="@{/establecimientos(page=${page.number}, size=${page.size},
+                                     sort=${(sortField == 'activo' and sortDir == 'asc') ? 'activo,desc' : 'activo,asc'})}">
+                        <span th:text="#{msg.establecimiento-list.activo}"></span>
+                        <span class="ms-1" th:if="${sortField == 'activo'}"
+                              th:text="${sortDir == 'asc'} ? '▲' : '▼'"></span>
+                    </a>
+                </th>
+                <th th:text="#{msg.establecimiento-list.actions}"></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="est : ${page.content}">
+                <td th:text="${est.id}"></td>
+                <td th:text="${est.nombre}"></td>
+                <!-- El tipo se muestra traducido (msg.tipoEstablecimiento.DISCOTECA...) -->
+                <td th:text="#{${'msg.tipoEstablecimiento.' + est.tipo}}"></td>
+                <td th:text="${est.aforoMaximo}"></td>
+                <td>
+                    <span th:if="${est.activo}" class="badge bg-success" th:text="#{msg.common.yes}"></span>
+                    <span th:unless="${est.activo}" class="badge bg-secondary" th:text="#{msg.common.no}"></span>
+                </td>
+                <td>
+                    <!-- Ver detalle -->
+                    <a th:href="@{/establecimientos/detail(id=${est.id})}"
+                       class="btn btn-outline-secondary btn-sm me-1"
+                       th:text="#{msg.establecimiento-list.viewDetail}"></a>
+
+                    <!-- Editar -->
+                    <a th:href="@{/establecimientos/edit(id=${est.id})}"
+                       class="btn btn-primary btn-sm"
+                       th:text="#{msg.establecimiento-list.edit}"></a>
+
+                    <!-- Eliminar -->
+                    <form th:action="@{/establecimientos/delete}" method="post" class="d-inline">
+                        <input type="hidden" name="id" th:value="${est.id}"/>
+                        <button type="submit"
+                                class="btn btn-danger btn-sm"
+                                th:text="#{msg.establecimiento-list.delete}"
+                                th:onclick="|return confirm('#{msg.establecimiento-list.confirm}');|"></button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <!-- Paginación -->
+        <div class="d-flex justify-content-between align-items-center mt-3"
+             th:if="${page != null and page.totalPages > 0}">
+
+            <!-- Info de página: "Página X de Y (N registros en total)" -->
+            <div>
+                <span th:text="#{msg.pagination.info(${page.number} + 1, ${page.totalPages}, ${page.totalElements})}"></span>
+            </div>
+
+            <!-- Controles de paginación -->
+            <nav th:aria-label="#{msg.pagination.aria.label}">
+                <ul class="pagination mb-0">
+
+                    <!-- Botón Anterior -->
+                    <li class="page-item" th:classappend="${page.first} ? ' disabled'">
+                        <a class="page-link"
+                           th:href="@{/establecimientos(page=${page.number - 1}, size=${page.size}, sort=${sortParam})}"
+                           th:aria-label="#{msg.pagination.prev}">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+
+                    <!-- Números de página -->
+                    <li class="page-item"
+                        th:each="i : ${#numbers.sequence(0, page.totalPages - 1)}"
+                        th:classappend="${i == page.number} ? ' active'">
+                        <a class="page-link"
+                           th:text="${i + 1}"
+                           th:href="@{/establecimientos(page=${i}, size=${page.size}, sort=${sortParam})}"></a>
+                    </li>
+
+                    <!-- Botón Siguiente -->
+                    <li class="page-item" th:classappend="${page.last} ? ' disabled'">
+                        <a class="page-link"
+                           th:href="@{/establecimientos(page=${page.number + 1}, size=${page.size}, sort=${sortParam})}"
+                           th:aria-label="#{msg.pagination.next}">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+        <!-- Volver -->
+        <a th:href="@{/}" class="btn btn-secondary mt-3" th:text="#{msg.establecimiento-list.returnback}"></a>
+
+    </div>
+</main>
+
+<!-- Insertar el fragmento del footer -->
+<footer th:replace="fragments/footer :: footer"></footer>
+
+<div th:replace="fragments/scripts :: scripts"></div>
+
+</body>
+</html>

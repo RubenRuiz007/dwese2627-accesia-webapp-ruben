@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 200" width="220" height="200" role="img" aria-label="Accesia">
+  <!-- Fondo: cuadrado redondeado azul petróleo -->
+  <rect x="0" y="0" width="220" height="200" rx="26" ry="26" fill="#1F6F8B"/>
+  <!-- Arco blanco (la puerta de entrada) -->
+  <path d="M43 194 V104 A67 67 0 0 1 177 104 V194 Z" fill="#FFFFFF"/>
+  <!-- Hueco de la puerta -->
+  <path d="M80 194 V98 Q80 78 100 78 H120 Q140 78 140 98 V194 Z" fill="#1F6F8B"/>
+  <!-- Persona en amarillo: cabeza y cuerpo -->
+  <ellipse cx="110" cy="145" rx="13" ry="10" fill="#FFBB00"/>
+  <path d="M93 194 V178 A17 17 0 0 1 127 178 V194 Z" fill="#FFBB00"/>
+</svg>

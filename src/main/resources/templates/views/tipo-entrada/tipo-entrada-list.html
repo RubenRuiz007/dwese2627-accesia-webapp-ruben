@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head :: head ('Accesia - Tipos de entrada')"></head>
+
+<body class="d-flex flex-column h-100">
+
+<!-- Insertar el fragmento del header -->
+<header th:replace="fragments/header :: header"></header>
+<!-- Contenido dinámico -->
+<main class="list-page">
+    <!-- sortField y sortDir se sacan de sortParam ("campo,asc|desc") que envía el controller -->
+    <div class="list-card"
+         th:with="sortField=${sortParam != null ? #strings.substringBefore(sortParam, ',') : 'nombre'},
+                  sortDir=${sortParam != null ? #strings.substringAfter(sortParam, ',') : 'asc'}">
+
+        <!-- Título listado -->
+        <h1 th:text="#{msg.tipoEntrada-list.title}"></h1>
+
+        <!-- Botón para añadir nuevo tipo de entrada -->
+        <a th:href="@{/tipos-entrada/new}" class="btn btn-success" th:text="#{msg.tipoEntrada-list.add}"></a>
+
+        <!-- Mensaje de error -->
+        <div th:if="${errorMessage}" class="alert alert-danger mt-3" th:text="${errorMessage}"></div>
+
+        <table class="table table-bordered table-striped mt-3" th:if="${page != null}">
+            <thead>
+            <tr>
+                <th>
+                    <a class="text-decoration-none"
+                       th:href="@{/tipos-entrada(page=${page.number}, size=${page.size},
+                                     sort=${(sortField == 'id' and sortDir == 'asc') ? 'id,desc' : 'id,asc'})}">
+                        <span th:text="#{msg.tipoEntrada-list.id}"></span>
+                        <span class="ms-1" th:if="${sortField == 'id'}"
+                              th:text="${sortDir == 'asc'} ? '▲' : '▼'"></span>
+                    </a>
+                </th>
+                <th>
+                    <a class="text-decoration-none"
+                       th:href="@{/tipos-entrada(page=${page.number}, size=${page.size},
+                                     sort=${(sortField == 'nombre' and sortDir == 'asc') ? 'nombre,desc' : 'nombre,asc'})}">
+                        <span th:text="#{msg.tipoEntrada-list.nombre}"></span>
+                        <span class="ms-1" th:if="${sortField == 'nombre'}"
+                              th:text="${sortDir == 'asc'} ? '▲' : '▼'"></span>
+                    </a>
+                </th>
+                <th>
+                    <a class="text-decoration-none"
+                       th:href="@{/tipos-entrada(page=${page.number}, size=${page.size},
+                                     sort=${(sortField == 'precioReferencia' and sortDir == 'asc') ? 'precioReferencia,desc' : 'precioReferencia,asc'})}">
+                        <span th:text="#{msg.tipoEntrada-list.precioReferencia}"></span>
+                        <span class="ms-1" th:if="${sortField == 'precioReferencia'}"
+                              th:text="${sortDir == 'asc'} ? '▲' : '▼'"></span>
+                    </a>
+                </th>
+                <th>
+                    <a class="text-decoration-none"
+                       th:href="@{/tipos-entrada(page=${page.number}, size=${page.size},
+                                     sort=${(sortField == 'cupo' and sortDir == 'asc') ? 'cupo,desc' : 'cupo,asc'})}">
+                        <span th:text="#{msg.tipoEntrada-list.cupo}"></span>
+                        <span class="ms-1" th:if="${sortField == 'cupo'}"
+                              th:text="${sortDir == 'asc'} ? '▲' : '▼'"></span>
+                    </a>
+                </th>
+                <!-- Establecimiento (establecimiento.nombre) -->
+                <th>
+                    <a class="text-decoration-none"
+                       th:href="@{/tipos-entrada(page=${page.number}, size=${page.size},
+                                     sort=${(sortField == 'establecimiento.nombre' and sortDir == 'asc') ? 'establecimiento.nombre,desc' : 'establecimiento.nombre,asc'})}">
+                        <span th:text="#{msg.tipoEntrada-list.establecimiento}"></span>
+                        <span class="ms-1" th:if="${sortField == 'establecimiento.nombre'}"
+                              th:text="${sortDir == 'asc'} ? '▲' : '▼'"></span>
+                    </a>
+                </th>
+                <th th:text="#{msg.tipoEntrada-list.actions}"></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="tipo : ${page.content}">
+                <td th:text="${tipo.id}"></td>
+                <td th:text="${tipo.nombre}"></td>
+                <td th:text="${tipo.precioReferencia} + ' €'"></td>
+                <td th:text="${tipo.cupo} ?: '-'"></td>
+                <!-- Nombre del establecimiento que ofrece este tipo de entrada -->
+                <td th:text="${tipo.establecimientoNombre}"></td>
+                <td>
+                    <!-- Ver detalle -->
+                    <a th:href="@{/tipos-entrada/detail(id=${tipo.id})}"
+                       class="btn btn-outline-secondary btn-sm me-1"
+                       th:text="#{msg.tipoEntrada-list.viewDetail}"></a>
+
+                    <!-- Editar -->
+                    <a th:href="@{/tipos-entrada/edit(id=${tipo.id})}"
+                       class="btn btn-primary btn-sm"
+                       th:text="#{msg.tipoEntrada-list.edit}"></a>
+
+                    <!-- Eliminar -->
+                    <form th:action="@{/tipos-entrada/delete}" method="post" class="d-inline">
+                        <input type="hidden" name="id" th:value="${tipo.id}"/>
+                        <button type="submit"
+                                class="btn btn-danger btn-sm"
+                                th:text="#{msg.tipoEntrada-list.delete}"
+                                th:onclick="|return confirm('#{msg.tipoEntrada-list.confirm}');|"></button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <!-- Paginación -->
+        <div class="d-flex justify-content-between align-items-center mt-3"
+             th:if="${page != null and page.totalPages > 0}">
+
+            <!-- Info de página: "Página X de Y (N registros en total)" -->
+            <div>
+                <span th:text="#{msg.pagination.info(${page.number} + 1, ${page.totalPages}, ${page.totalElements})}"></span>
+            </div>
+
+            <!-- Controles de paginación -->
+            <nav th:aria-label="#{msg.pagination.aria.label}">
+                <ul class="pagination mb-0">
+
+                    <!-- Botón Anterior -->
+                    <li class="page-item" th:classappend="${page.first} ? ' disabled'">
+                        <a class="page-link"
+                           th:href="@{/tipos-entrada(page=${page.number - 1}, size=${page.size}, sort=${sortParam})}"
+                           th:aria-label="#{msg.pagination.prev}">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+
+                    <!-- Números de página -->
+                    <li class="page-item"
+                        th:each="i : ${#numbers.sequence(0, page.totalPages - 1)}"
+                        th:classappend="${i == page.number} ? ' active'">
+                        <a class="page-link"
+                           th:text="${i + 1}"
+                           th:href="@{/tipos-entrada(page=${i}, size=${page.size}, sort=${sortParam})}"></a>
+                    </li>
+
+                    <!-- Botón Siguiente -->
+                    <li class="page-item" th:classappend="${page.last} ? ' disabled'">
+                        <a class="page-link"
+                           th:href="@{/tipos-entrada(page=${page.number + 1}, size=${page.size}, sort=${sortParam})}"
+                           th:aria-label="#{msg.pagination.next}">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+        <!-- Volver -->
+        <a th:href="@{/}" class="btn btn-secondary mt-3" th:text="#{msg.tipoEntrada-list.returnback}"></a>
+
+    </div>
+</main>
+
+<!-- Insertar el fragmento del footer -->
+<footer th:replace="fragments/footer :: footer"></footer>
+
+<div th:replace="fragments/scripts :: scripts"></div>
+
+</body>
+</html>
